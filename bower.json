@@ -1,0 +1,26 @@
+{
+  "name": "material_port",
+  "version": "0.0.0",
+  "authors": [
+    "coffee-cup <jakerunzer@gmail.com>"
+  ],
+  "description": "music queue",
+  "main": "index.html",
+  "keywords": [
+    "portfolio"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.22",
+    "angular-route": "~1.2.22",
+    "angular-ui-utils": "~0.1.1",
+    "jquery": "~2.1.1",
+  }
+}
