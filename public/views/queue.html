@@ -18,17 +18,64 @@
         </div>
     </section>
 
-    <section class="column-group gutters top-content">
+    <div class="column-group gutters main-content">
         <div class="xlarge-70 large-70 medium-60 small-100 tiny-100">
+
+            <!-- Youtube Player -->
             <div fit-vids ng-show="isPlaying" class="player-wrapper">
                 <h2>Playing</h2>
                 <iframe id="player" type="text/html" width="1280" height="720" src="https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1" frameborder="0"></iframe </div>
-                <strong>{{playing.artist}}</strong> - {{playing.track}}
+                <strong>{{playing.artist}}</strong>- {{playing.track}}
             </div>
+
+            <!-- Nothing Playing Indication -->
             <div ng-hide="isPlaying">
-              Nothing to Play
+                Nothing to Play
+            </div>
+
+            <!-- Search Part -->
+            <div class="column-group search">
+                <div class="all-100">
+                    <form class="ink-form center">
+                        <h2>Search for Song to Queue</h2>
+                        <div class="column-group gutters">
+                            <div class="control-group all-33">
+                                <label for="track">Song</label>
+                                <div class="control">
+                                    <input ng-model="track" type="text">
+                                </div>
+                            </div>
+                            <div class="control-group all-33">
+                                <label for="artist">Artist</label>
+                                <div class="control">
+                                    <input ng-model="artist" type="text">
+                                </div>
+                            </div>
+                            <div class="control-group all-33">
+                                <div class="control search-button">
+                                    <button ng-click="search(track, artist)" class="ink-button">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="xlarge-70 large-70 medium-60 small-100 tiny-100">
+                    <div class="search-results">
+                        <div ng-hide="no_results" ng-repeat="s in searches">
+                            <button ng-click="queueTrack(s)" class="ink-button">
+                                <strong>{{s.artist}}</strong>- {{s.track}}
+                            </button>
+                        </div>
+                        <div ng-show="no_results">
+                            <strong>Sorry, Could not find any results for your query</strong>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Up Next Side Part -->
         <div class="xlarge-30 large-30 medium-40 small-100 tiny-100">
             <h2>Up Next</h2>
             <ul class="unstyled">
@@ -43,45 +90,5 @@
                 </li>
             </ul>
         </div>
-    </section>
-
-    <section class="column-group bot-content">
-        <div class="xlarge-70 large-70 medium-60 small-100 tiny-100">
-            <form class="ink-form center">
-                <h2>Search for Song to Queue</h2>
-                <div class="column-group gutters">
-                    <div class="control-group all-33">
-                        <label for="track">Song</label>
-                        <div class="control">
-                            <input ng-model="track" type="text">
-                        </div>
-                    </div>
-                    <div class="control-group all-33">
-                        <label for="artist">Artist</label>
-                        <div class="control">
-                            <input ng-model="artist" type="text">
-                        </div>
-                    </div>
-                    <div class="control-group all-33">
-                        <div class="control search-button">
-                            <button ng-click="search(track, artist)" class="ink-button">Search</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <div class="xlarge-70 large-70 medium-60 small-100 tiny-100">
-            <div class="search-results">
-                <div ng-hide="no_results" ng-repeat="s in searches">
-                    <button ng-click="queueTrack(s)" class="ink-button">
-                        <strong>{{s.artist}}</strong> - {{s.track}}
-                    </button>
-                </div>
-                <div ng-show="no_results">
-                    <strong>Sorry, Could not find any results for your query</strong>
-                </div>
-            </div>
-        </div>
-    </section>
+    </div>
 </div>
