@@ -19,11 +19,14 @@
     </section>
 
     <section class="column-group gutters top-content">
-        <div class="xlarge-70 large-70 medium-60 small-100 tiny-100 player-wrapper">
-            <div fit-vids>
+        <div class="xlarge-70 large-70 medium-60 small-100 tiny-100">
+            <div fit-vids ng-show="isPlaying" class="player-wrapper">
                 <h2>Playing</h2>
-                <iframe id="player" type="text/html" class="hidden" width="1280" height="720" src="https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1" frameborder="0"></iframe </div>
+                <iframe id="player" type="text/html" width="1280" height="720" src="https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1" frameborder="0"></iframe </div>
                 <strong>{{playing.artist}}</strong> - {{playing.track}}
+            </div>
+            <div ng-hide="isPlaying">
+              Nothing to Play
             </div>
         </div>
         <div class="xlarge-30 large-30 medium-40 small-100 tiny-100">

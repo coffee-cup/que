@@ -16,14 +16,6 @@ client.on('error', function(err) {
   log.error('Error ' + err);
 });
 
-// MKEY = 'key';
-// client.rpush(MKEY, 'test1');
-// client.rpush(MKEY, 'test2');
-// client.rpush(MKEY, 'test3');
-// client.lrange(MKEY, 0, -1, function(err, data) {
-//   if (err) console.log(err);
-//   console.log(data);
-// });
 
 // view engine setup
 app.engine('html', require('ejs').renderFile);

@@ -1,17 +1,44 @@
-var youtube = require('youtube-node');
+var request = require('request');
 var secrets = require('../config/secrets');
-
-youtube.setKey(secrets.YOUTUBE_API_KEY);
+var API_ROOT = 'https://www.googleapis.com/youtube/v3/'
 
 // returns the top search result for the track
 module.exports.musicSearch = function(track, artist, callback) {
-  youtube.search(artist  + ' - ' + track, 1, function(results) {
-    var snippet = results.items[0].snippet;
-    var youtube_id = results.items[0].id.videoId;
+  var params = {
+    q: artist + ' - ' + track,
+    part: 'snippet',
+    key: secrets.YOUTUBE_API_KEY,
+    maxResults: 1
+  };
 
-    if (snippet && youtube_id) {
-      var y = {title: snippet.title, youtube_id: youtube_id};
-      callback(y);
+  request({
+    url: API_ROOT + 'search',
+    json: true,
+    qs: params
+  }, function(error, response, body) {
+    if (error) log.error(error);
+
+    if (body.items) {
+      var item = body.items[0];
+      callback(item);
+    }else {
+      callback(null);
+    }
+  });
+}
+
+// gets information for 1 video id
+module.exports.videoInfo = function(video_id, callback) {
+  var params = {part: 'contentDetails', id: video_id, key: secrets.YOUTUBE_API_KEY};
+
+  request({url: API_ROOT + 'videos', json: true, qs: params}, function(error, response, body) {
+    if (error) log.error(error);
+
+    if (body.items) {
+      var item = body.items[0];
+      callback(item);
+    }else {
+      callback(null);
     }
   });
 }

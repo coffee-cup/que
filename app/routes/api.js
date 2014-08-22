@@ -8,18 +8,14 @@ var moment = require('moment');
 var API = '/api/';
 
 module.exports = function(io, client) {
+
+  // a user has connected to the page
   io.on('connection', function(socket) {
     log.info('a user connected');
 
     // called when user wants to generate a new page
     socket.on('create_page', function(data) {
-      var track = {
-        video_id: 'pco91kroVgQ',
-        track: 'Applause',
-        artist: 'Lady Gaga'
-      };
       var page_id = shortId.generate();
-      client.rpush(page_id, JSON.stringify(track));
       socket.emit('new_page', {
         page_id: page_id
       });
@@ -50,10 +46,9 @@ module.exports = function(io, client) {
           }
 
           log.info('getting specific video info');
-          youtube.videoInfo(t.video_id, function(info) {
-            info = info.items[0];
-            if (info.contentDetails) {
-              var isodur = info.contentDetails.duration;
+          youtube.videoInfo(t.video_id, function(item) {
+            if (item.contentDetails) {
+              var isodur = item.contentDetails.duration;
               var time = utils.convertDuration(isodur);
               var duration = moment.duration({
                 seconds: time.S,
@@ -68,21 +63,25 @@ module.exports = function(io, client) {
 
                 // the key time exists
                 if (extime) {
-                  var queue_end_time = extime + duration.asSeconds();
+                  console.log(extime);
+                  var queue_end_time = parseInt(extime) + duration.asSeconds();
                   console.log(queue_end_time);
-                  client.set(key + '-queuetime', queue_end_time);
-                }else {
+                } else {
                   // key time does not exist,
                   // so just use duration + current time for expirey
-                var queue_end_time = moment().unix() + duration.asSeconds();
-                client.set(key + '-queuetime', queue_end_time);
+                  var queue_end_time = moment().unix() + duration.asSeconds();
                 }
+                client.set(key + '-queuetime', queue_end_time);
+
+                // send the video to each client in the same queue
+                t.extime = queue_end_time;
+                t.duration = duration.asSeconds();
+                t = JSON.stringify(t);
+                io.emit(key + '-queue', [t]);
+                client.zadd(key, queue_end_time, t);
               });
             }
           });
-          // var t = JSON.stringify(y);
-          // io.emit(key + '-queue', [t]);
-          // client.rpush(key, t);
         });
       }
     });
@@ -90,8 +89,11 @@ module.exports = function(io, client) {
     // returns the full queue for the key
     socket.on('get_queue', function(data) {
       var key = data.key;
+      var now = moment().unix();
       if (key) {
-        client.lrange(key, 0, -1, function(err, mqueue) {
+        client.zrangebyscore([key, '(' + now, '+inf'], function(err, mqueue) {
+          if (err) log.error(err);
+
           socket.emit(key + '-queue', mqueue);
         });
       }

@@ -4,6 +4,7 @@ angular.module('queueController.controller', [])
     var socket = io();
     $scope.queue = [];
     $scope.playing = null;
+    $scope.isPlaying = false;
     $scope.no_results = false;
 
     // safe apply to check if already in progress
@@ -19,7 +20,7 @@ angular.module('queueController.controller', [])
     };
 
     function convertToObjects(list_of_jsons) {
-      for(var i=0;i<list_of_jsons.length;i++) {
+      for (var i = 0; i < list_of_jsons.length; i++) {
         list_of_jsons[i] = JSON.parse(list_of_jsons[i]);
       }
       return list_of_jsons;
@@ -32,10 +33,8 @@ angular.module('queueController.controller', [])
     socket.on('search_results', function(data) {
       $scope.safeApply(function() {
         if (data.status == 'failure') {
-          console.log('no resutls found');
           $scope.no_results = true;
         } else {
-          console.log('got search results');
           $scope.no_results = false;
           $scope.searches = data;
         }
@@ -44,17 +43,13 @@ angular.module('queueController.controller', [])
 
     socket.on($routeParams.key + '-queue', function(data) {
       data = convertToObjects(data);
-
-      console.log('got new video(s)');
       $scope.safeApply(function() {
-        if ($scope.queue.length == 0 && !$scope.playing) {
+        if ($scope.queue.length == 0 && !$scope.isPlaying) {
           $scope.queue = $scope.queue.concat(data);
           loadNextVideo();
         } else {
           $scope.queue = $scope.queue.concat(data);
-          console.log($scope.queue);
         }
-        console.log($scope.queue);
       });
     });
 
@@ -66,12 +61,6 @@ angular.module('queueController.controller', [])
       });
     }
 
-    function loadVideo(video_obj) {
-      $scope.playing = video_obj;
-      player.loadVideoById(video_obj.video_id);
-    }
-
-
     $scope.queueTrack = function(t) {
       socket.emit('queue', {
         track: t,
@@ -79,13 +68,28 @@ angular.module('queueController.controller', [])
       });
     }
 
+    function loadVideo(video_obj) {
+      $scope.playing = video_obj;
+      $scope.isPlaying = true;
+      player.loadVideoById(video_obj.video_id);
+
+      // this syncs the times with other clients
+      // based on the expirey time of the video
+      var now = new Date().getTime() / 1000;
+      var ex = parseInt(video_obj.extime);
+      var diff = ex - now;
+      var duration = parseInt(video_obj.duration);
+      player.seekTo(duration - diff, true);
+    }
+
     function loadNextVideo() {
-      $('#player').removeClass('hidden');
       if (player) {
         // queue would be 0 on first load of the page
         if ($scope.queue.length > 0) {
-          console.log('queue not empty, loading next video');
           loadVideo($scope.queue.shift());
+        } else {
+          $scope.playing = null;
+          $scope.isPlaying = false;
         }
       }
     }
@@ -117,8 +121,9 @@ angular.module('queueController.controller', [])
 
     // 4. The API will call this function when the video player is ready.
     $window.onPlayerReady = function(event) {
-      console.log('player ready');
-      socket.emit('get_queue', {key: $routeParams.key});
+      socket.emit('get_queue', {
+        key: $routeParams.key
+      });
     }
 
     // 5. The API calls this function when the player's state changes.
@@ -129,7 +134,6 @@ angular.module('queueController.controller', [])
     $window.onPlayerStateChange = function(event) {
       if (event.data == YT.PlayerState.ENDED) {
         $scope.safeApply(function() {
-          $scope.playing = null;
           loadNextVideo();
         });
       }
