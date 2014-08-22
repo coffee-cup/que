@@ -47,3 +47,5 @@ config/secrets.js
 
 # Sass Cache
 .sass-cache
+
+*.log
