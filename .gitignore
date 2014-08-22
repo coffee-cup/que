@@ -48,4 +48,5 @@ config/secrets.js
 # Sass Cache
 .sass-cache
 
-*.log
+# Node Log
+node_app.log
