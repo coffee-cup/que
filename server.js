@@ -4,9 +4,26 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var log = require('./config/log.js');
 
 var app = express();
 var http = require('http').Server(app);
+
+var redis = require('redis');
+client = redis.createClient();
+
+client.on('error', function(err) {
+  log.error('Error ' + err);
+});
+
+// MKEY = 'key';
+// client.rpush(MKEY, 'test1');
+// client.rpush(MKEY, 'test2');
+// client.rpush(MKEY, 'test3');
+// client.lrange(MKEY, 0, -1, function(err, data) {
+//   if (err) console.log(err);
+//   console.log(data);
+// });
 
 // view engine setup
 app.engine('html', require('ejs').renderFile);
@@ -23,16 +40,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // socket.io setup
 var io = require('socket.io')(http);
-require('./app/routes/api')(io);
+require('./app/routes/api')(io, client);
 
 // routes
-require('./app/routes/index')(app);
+require('./app/routes/index')(app, client);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
 
 /// error handlers
@@ -40,29 +57,27 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
     });
+  });
 }
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: {}
+  });
 });
 
 
 app.set('port', process.env.PORT || 9100);
-
-var log = require('./config/log.js');
 
 // start server
 http.listen(app.get('port'), function() {
