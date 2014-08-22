@@ -49,12 +49,12 @@ footer {
 .nav-bar {
     margin-left: 8em;
 }
-.top-content {
+.main-content {
     margin: 1em;
     padding-left: 2em;
 }
-.bot-content {
-    margin: 0 1.2em 1em 1.2em;
+.search {
+    margin: 1.2em 1.2em 1em 1.2em;
 }
 #player {
 
