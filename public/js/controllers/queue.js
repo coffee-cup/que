@@ -7,6 +7,30 @@ angular.module('queueController.controller', [])
     $scope.isPlaying = false;
     $scope.no_results = false;
 
+    // set the header background color
+    var color = intToARGB(hashCode($routeParams.key));
+    console.log(color);
+    $('.banner').css('background', '#' + color);
+
+    // Hash any string into an integer value
+    function hashCode(str) {
+      var hash = 0;
+      for (var i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return hash;
+    }
+
+    // Convert an int to hexadecimal with a max length
+    // of six characters.
+    function intToARGB(i) {
+      var h = ((i >> 24) & 0xFF).toString(16) +
+        ((i >> 16) & 0xFF).toString(16) +
+        ((i >> 8) & 0xFF).toString(16) +
+        (i & 0xFF).toString(16);
+      return h.substring(0, 6);
+    }
+
     // safe apply to check if already in progress
     $scope.safeApply = function(fn) {
       var phase = this.$root.$$phase;
