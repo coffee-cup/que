@@ -68,6 +68,13 @@ module.exports.trackSearch = function(track, artist, callback) {
       if (body.results.trackmatches.track) {
         var tracks = body.results.trackmatches.track;
         var ts = [];
+
+        // if there is only one track returned,
+        // tracks is not a array, its just an object
+        if (!tracks.length) {
+          tracks = [tracks];
+        }
+
         for (var i = 0; i < tracks.length; i++) {
           var t = {};
           t.track = tracks[i].name;
@@ -105,6 +112,10 @@ module.exports.artistTopTracks = function(artist, callback) {
       if (body.toptracks) {
         var tracks = body.toptracks.track;
         if (tracks) {
+          if (!tracks.length) {
+            tracks = [tracks];
+          }
+
           var ts = [];
           for (var i = 0; i < tracks.length; i++) {
             var t = {};
