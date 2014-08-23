@@ -19,6 +19,10 @@ module.exports = function(io, client) {
       socket.emit('new_page', {
         page_id: page_id
       });
+
+      // add an empty item to the page
+      // so the link can be shared right away
+      client.zadd(page_id, '1', {});
       log.info('created new page with id ' + page_id);
     });
 
