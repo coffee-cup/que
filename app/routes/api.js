@@ -87,19 +87,24 @@ module.exports = function(io, client) {
                 // getting track information from lastfm
                 lastfm.trackInfo(t.track, t.artist, function(data) {
 
+                  var useThumbnail = true;
+
                   // if we can, get the images and summary from lastfm track info
                   if (data) {
                     // get the album image if its there
                     if (data.track && data.track.album) {
                       var images = data.track.album.image;
                       if (images) {
+                        useThumbnail = false;
                         if (images[0]) t.image_small = images[0]['#text'];
                         if (images[1]) t.image_medium = images[1]['#text'];
                         if (images[2]) t.image_large = images[2]['#text'];
                         if (images[3]) t.image_xlarge = images[3]['#text'];
                       }
                     }
-                  } else {
+                  }
+
+                  if (useThumbnail) {
                     // otherwise we just use the youtube video thumbnails as images
                     // and no summary
                     log.info('could not get track info for ' + t.track);
@@ -111,8 +116,6 @@ module.exports = function(io, client) {
                       t.image_xlarge = y.snippet.thumbnails.medium.url;
                     }
                   }
-
-                  console.log(t);
 
                   t = JSON.stringify(t);
                   io.emit(key + '-queue', [t]);
