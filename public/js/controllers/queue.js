@@ -42,6 +42,11 @@ angular.module('queueController.controller', [])
     });
 
     socket.on($routeParams.key + '-queue', function(data) {
+      if (!data || data.status == 'failure') {
+        // the video queuing did not work
+        return;
+      }
+
       data = convertToObjects(data);
       $scope.safeApply(function() {
         if ($scope.queue.length == 0 && !$scope.isPlaying) {

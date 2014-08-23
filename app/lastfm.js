@@ -26,6 +26,27 @@ module.exports.getMethod = function(method, params, callback) {
   });
 }
 
+// get track information from lastfm
+module.exports.trackInfo = function(track, artist, callback) {
+  var params = {
+    api_key: secrets.LASTFM_API_KEY,
+    format: 'json',
+    method: 'track.getinfo',
+    artist: artist,
+    track: track
+  }
+
+  log.info('get track info for: ' + track);
+  request({url: API_ROOT, json: true, qs: params}, function(error, response, body) {
+    if (!error && response.statusCode == 200 && body) {
+      callback(body);
+    }else {
+      callback(null);
+    }
+  });
+}
+
+
 // search for a track with artist and track
 module.exports.trackSearch = function(track, artist, callback) {
   var params = {
@@ -89,22 +110,14 @@ module.exports.artistTopTracks = function(artist, callback) {
             var t = {};
             t.track = tracks[i].name;
             t.artist = tracks[i].artist.name;
-            console.log(t);
-
-            // get artsit images
-            if (tracks[i].image) {
-              for (var j = 0; j < tracks[i].image.length; j++) {
-                var image = tracks[i].image[j];
-                console.log(image);
-              }
-            }
+            t.track_mbid = tracks[i].mbid;
             ts.push(t);
           }
           callback(ts);
         } else {
           callback(null);
         }
-      }else {
+      } else {
         callback(null);
       }
     } else {

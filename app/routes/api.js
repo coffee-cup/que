@@ -47,7 +47,7 @@ module.exports = function(io, client) {
 
           log.info('getting specific video info');
           youtube.videoInfo(t.video_id, function(item) {
-            if (item.contentDetails) {
+            if (item && item.contentDetails) {
               var isodur = item.contentDetails.duration;
               var time = utils.convertDuration(isodur);
               var duration = moment.duration({
@@ -77,16 +77,54 @@ module.exports = function(io, client) {
                   // so just use duration + current time for expirey
                   var queue_end_time = moment().unix() + duration.asSeconds();
                 }
+
                 client.set(key + '-queuetime', queue_end_time);
 
                 // send the video to each client in the same queue
                 t.extime = queue_end_time;
                 t.duration = duration.asSeconds();
-                t = JSON.stringify(t);
-                io.emit(key + '-queue', [t]);
-                log.info('sending new track to queue - ' + key);
-                client.zadd(key, queue_end_time, t);
+
+                // getting track information from lastfm
+                lastfm.trackInfo(t.track, t.artist, function(data) {
+
+                  // if we can, get the images and summary from lastfm track info
+                  if (data) {
+                    // get the album image if its there
+                    if (data.track && data.track.album) {
+                      var images = data.track.album.image;
+                      if (images) {
+                        if (images[0]) t.image_small = images[0]['#text'];
+                        if (images[1]) t.image_medium = images[1]['#text'];
+                        if (images[2]) t.image_large = images[2]['#text'];
+                        if (images[3]) t.image_xlarge = images[3]['#text'];
+                      }
+                    }
+                  } else {
+                    // otherwise we just use the youtube video thumbnails as images
+                    // and no summary
+                    log.info('could not get track info for ' + t.track);
+                    log.info('using thumbnails for track images')
+                    if (y.snippet.thumbnails) {
+                      t.image_small = y.snippet.thumbnails.default.url;
+                      t.image_medium = y.snippet.thumbnails.default.url;
+                      t.image_large = y.snippet.thumbnails.medium.url;
+                      t.image_xlarge = y.snippet.thumbnails.medium.url;
+                    }
+                  }
+
+                  console.log(t);
+
+                  t = JSON.stringify(t);
+                  io.emit(key + '-queue', [t]);
+                  log.info('sending new track to queue - ' + key);
+                  client.zadd(key, queue_end_time, t);
+                });
               });
+            }else {
+              // no video could be found
+              // if the video can not be found, send message just to the client
+              // who tried to queue the song
+              socket.emit(key + '-queue', {status: 'failure', message: 'could not find video'})
             }
           });
         });
@@ -115,7 +153,10 @@ module.exports = function(io, client) {
         socket.emit('search_results', tracks);
       } else {
         log.info('sending back failure for search results to ' + socket.id);
-        socket.emit('search_results', {status: 'failure', message: 'your search came up empty'});
+        socket.emit('search_results', {
+          status: 'failure',
+          message: 'your search came up empty'
+        });
       }
     }
 

@@ -16,7 +16,6 @@ client.on('error', function(err) {
   log.error('Error ' + err);
 });
 
-
 // view engine setup
 app.engine('html', require('ejs').renderFile);
 app.set('views', path.join(__dirname, 'public/views'));
