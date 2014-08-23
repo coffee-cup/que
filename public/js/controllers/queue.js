@@ -125,11 +125,6 @@ angular.module('queueController.controller', [])
 
     // youtube javascript api v3
 
-    // get height to keep aspect ratio 16:9
-    function getHeight(width) {
-      return width / (16 / 9);
-    }
-
     var tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -137,9 +132,6 @@ angular.module('queueController.controller', [])
     var player;
 
     $window.onYouTubeIframeAPIReady = function() {
-      var width = $('.player-wrapper').width();
-      var height = getHeight(width);
-
       player = new YT.Player('player', {
         events: {
           'onReady': onPlayerReady,
