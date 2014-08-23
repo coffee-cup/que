@@ -4,6 +4,7 @@ var youtube = require('../youtube');
 var utils = require('../utils');
 var shortId = require('shortId');
 var moment = require('moment');
+var S = require('string');
 
 var API = '/api/';
 
@@ -184,9 +185,10 @@ module.exports = function(io, client) {
 
       log.info('recived search');
 
-      // TODO: normalize these values
-      var track = data.track;
-      var artist = data.artist;
+      // use string.js to humanize the inputs
+      // this way we can cache the search results better
+      var track = S(data.track).humanize().collapseWhitespace().s;
+      var artist = S(data.artist).humanize().collapseWhitespace().s;
 
       if (!track && artist) {
         // just get artists top tracks

@@ -1,6 +1,6 @@
 var request = require('request');
 var log = require('../config/log');
-var secrets = require('../config/secrets')
+var secrets = require('../config/secrets');
 
 var API_ROOT = 'http://ws.audioscrobbler.com/2.0/';
 var LIMIT = 10;
