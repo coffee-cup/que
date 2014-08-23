@@ -32,7 +32,7 @@ angular.module('queueController.controller', [])
 
     socket.on('search_results', function(data) {
       $scope.safeApply(function() {
-        if (data.status == 'failure') {
+        if (data.status == 'failure' || !data) {
           $scope.no_results = true;
         } else {
           $scope.no_results = false;

@@ -56,16 +56,22 @@ module.exports = function(io, client) {
                 hours: time.H
               });
 
-              console.log(duration.asSeconds());
-
               client.get(key + '-queuetime', function(err, extime) {
                 if (err) log.error(err);
 
                 // the key time exists
                 if (extime) {
-                  console.log(extime);
-                  var queue_end_time = parseInt(extime) + duration.asSeconds();
-                  console.log(queue_end_time);
+                  extime = parseInt(extime);
+
+                  if (moment().unix() > extime) {
+                    // the queue has not had songs
+                    // so just use now as start for expiry time
+                    var queue_end_time = moment().unix() + duration.asSeconds();
+                  } else {
+                    // there are currently songs in the queue
+                    // so use the expirey time cached
+                    var queue_end_time = parseInt(extime) + duration.asSeconds();
+                  }
                 } else {
                   // key time does not exist,
                   // so just use duration + current time for expirey
@@ -78,6 +84,7 @@ module.exports = function(io, client) {
                 t.duration = duration.asSeconds();
                 t = JSON.stringify(t);
                 io.emit(key + '-queue', [t]);
+                log.info('sending new track to queue - ' + key);
                 client.zadd(key, queue_end_time, t);
               });
             }
@@ -102,9 +109,14 @@ module.exports = function(io, client) {
     // will process list of tracks and send message back
     // to socket with id given
     function processTracks(tracks) {
-      tracks.status = 'success';
-      log.info('send back search results to ' + socket.id);
-      socket.emit('search_results', tracks);
+      if (tracks) {
+        tracks.status = 'success';
+        log.info('sending back search results to ' + socket.id);
+        socket.emit('search_results', tracks);
+      } else {
+        log.info('sending back failure for search results to ' + socket.id);
+        socket.emit('search_results', {status: 'failure', message: 'your search came up empty'});
+      }
     }
 
     // will emit null to clients
@@ -129,51 +141,11 @@ module.exports = function(io, client) {
       var artist = data.artist;
 
       if (!track && artist) {
-        log.info('just artist provided');
         // just get artists top tracks
-        lastfm.getMethod('artist.gettoptracks', {
-          artist: artist
-        }, function(data) {
-          var tracks = data.toptracks.track;
-          if (tracks) {
-            var ts = [];
-            for (var i = 0; i < tracks.length; i++) {
-              var t = {};
-              t.track = tracks[i].name;
-              t.artist = tracks[i].artist.name;
-              ts.push(t);
-            }
-
-            processTracks(ts);
-          } else {
-            noResults();
-          }
-        });
+        lastfm.artistTopTracks(artist, processTracks);
       } else {
-        log.info('track and artist provided');
         // search for track using track name and artist
-        lastfm.getMethod('track.search', {
-          track: track,
-          artist: artist
-        }, function(data) {
-          if (data.results) {
-            var tracks = data.results.trackmatches.track;
-            if (tracks) {
-              var ts = [];
-              for (var i = 0; i < tracks.length; i++) {
-                var t = {};
-                t.track = tracks[i].name;
-                t.artist = tracks[i].artist;
-                ts.push(t);
-              }
-              processTracks(ts);
-            } else {
-              noResults();
-            }
-          } else {
-            noResults();
-          }
-        });
+        lastfm.trackSearch(track, artist, processTracks);
       }
     });
   });
