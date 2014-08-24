@@ -12,11 +12,13 @@
 
     <!-- Add your site or application content here -->
 
-    <section class="column-group banner">
-        <div class="all-100 center">
-            <!-- <h1>Que</h1> -->
-        </div>
-    </section>
+    <a href="/">
+        <section class="column-group banner">
+            <div class="all-100 center">
+                <!-- <h1>Que</h1> -->
+            </div>
+        </section>
+    </a>
 
     <div class="column-group gutters main-content">
         <div class="xlarge-70 large-70 medium-60 small-100 tiny-100">
@@ -34,7 +36,7 @@
             </div>
 
             <!-- Search Part -->
-            <div class="column-group search">
+            <div ng-show="connected" class="column-group search">
                 <div class="all-100">
                     <form class="ink-form center">
                         <h2>Search for Song to Queue</h2>

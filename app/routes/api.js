@@ -2,7 +2,6 @@ var log = require('../../config/log');
 var lastfm = require('../lastfm');
 var youtube = require('../youtube');
 var utils = require('../utils');
-var shortId = require('shortId');
 var moment = require('moment');
 var S = require('string');
 

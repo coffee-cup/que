@@ -1,15 +1,19 @@
 angular.module('queueController.controller', [])
   .controller('queueController', function($scope, $window, $routeParams) {
 
-    var socket = io();
+    // force a new connect to socketio
+    // required for angularjs page changing
+    var socket = io.connect('', {
+      'force new connection': true
+    });
     $scope.queue = [];
     $scope.playing = null;
     $scope.isPlaying = false;
     $scope.no_results = false;
+    $scope.connected = false;
 
     // set the header background color
     var color = intToARGB(hashCode($routeParams.key));
-    console.log(color);
     $('.banner').css('background', '#' + color);
 
     // Hash any string into an integer value
@@ -43,6 +47,13 @@ angular.module('queueController.controller', [])
       }
     };
 
+    $scope.$on('$destroy', function(event) {
+      // disconnect socket when leaving page
+      if (player) {
+        player.destroy();
+      }
+    });
+
     function convertToObjects(list_of_jsons) {
       for (var i = 0; i < list_of_jsons.length; i++) {
         list_of_jsons[i] = JSON.parse(list_of_jsons[i]);
@@ -51,7 +62,23 @@ angular.module('queueController.controller', [])
     }
 
     socket.on('connect', function() {
-      console.log('connected to server');
+      $scope.safeApply(function() {
+        $scope.connected = true;
+        if (YT && YT.Player) {
+          player = new YT.Player('player', {
+            events: {
+              'onReady': onPlayerReady,
+              'onStateChange': onPlayerStateChange
+            }
+          });
+        }
+      });
+    });
+
+    socket.on('disconnect', function() {
+      $scope.safeApply(function() {
+        $scope.connected = false;
+      });
     });
 
     socket.on('search_results', function(data) {
@@ -123,6 +150,17 @@ angular.module('queueController.controller', [])
       }
     }
 
+    $scope.gotAll = false;
+
+    function getAllQueue() {
+      if (!$scope.gotAll && player) {
+        $scope.gotAll = true;
+        socket.emit('get_queue', {
+          key: $routeParams.key
+        });
+      }
+    }
+
     // youtube javascript api v3
 
     var tag = document.createElement('script');
@@ -142,9 +180,7 @@ angular.module('queueController.controller', [])
 
     // 4. The API will call this function when the video player is ready.
     $window.onPlayerReady = function(event) {
-      socket.emit('get_queue', {
-        key: $routeParams.key
-      });
+      getAllQueue();
     }
 
     // 5. The API calls this function when the player's state changes.

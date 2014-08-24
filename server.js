@@ -38,6 +38,7 @@ require('./app/routes/index')(app, client);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
+  log.error('404 error');
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
