@@ -14,6 +14,7 @@ angular.module('queueController.controller', [])
     $scope.isResults = false; // if we have not yet search (whether we should hide results div)
     $scope.connected = false; // if we are connected to socketio
     $scope.isSearching = false; // are we currently searching for track
+    $scope.isQueueing = false; //if we are currently queuing a track
 
     // set the header background color
     var color = intToARGB(hashCode($routeParams.key));
@@ -85,6 +86,7 @@ angular.module('queueController.controller', [])
     });
 
     socket.on('search_results', function(data) {
+      console.log('search_resutls');
       $scope.safeApply(function() {
         $scope.isSearching = false;
         $scope.isResults = true;
@@ -97,12 +99,7 @@ angular.module('queueController.controller', [])
       });
     });
 
-    socket.on($routeParams.key + '-queue', function(data) {
-      if (!data || data.status == 'failure') {
-        // the video queuing did not work
-        return;
-      }
-
+    function queueData(data) {
       data = convertToObjects(data);
       $scope.safeApply(function() {
         if ($scope.queue.length == 0 && !$scope.isPlaying) {
@@ -112,6 +109,30 @@ angular.module('queueController.controller', [])
           $scope.queue = $scope.queue.concat(data);
         }
       });
+    }
+
+    // called when the inital all tracks come in
+    // or when another client queues a song
+    socket.on($routeParams.key + '-queue', function(data) {
+      if (!data || data.status == 'failure') {
+        // the video queuing did not work
+        return;
+      }
+
+      queueData(data);
+    });
+
+    // this gets called instead of key-queue when you queue
+    // a track, and the server broadcasts that to everyone
+    // instead of the same message as everyone, you get this
+    // it is so you can tell the status of your queue
+    socket.on('your-queue', function(data) {
+      $scope.isQueueing = false;
+      if (!data || data.status == 'failure') {
+        // your track queue did not work
+      } else {
+        queueData(data);
+      }
     });
 
     $scope.search = function(track, artist) {
@@ -123,16 +144,31 @@ angular.module('queueController.controller', [])
       });
     }
 
+    // ask server to queue track and send
+    // to all connected clients
     $scope.queueTrack = function(t) {
-      socket.emit('queue', {
-        track: t,
-        key: $routeParams.key
-      });
+      // do not queue if another is already queing
+      if (!$scope.isQueueing) {
+        $scope.isQueueing = true;
+        socket.emit('queue', {
+          track: t,
+          key: $routeParams.key
+        });
+      }
     }
 
     function loadVideo(video_obj) {
       $scope.playing = video_obj;
       $scope.isPlaying = true;
+
+      if (!player) {
+        player = new YT.Player('player', {
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
       player.loadVideoById(video_obj.video_id);
 
       // this syncs the times with other clients

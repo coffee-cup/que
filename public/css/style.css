@@ -61,10 +61,17 @@ footer {
     margin: 1em;
     padding-left: 2em;
 }
-.no-link {
-    color: #404040;
+.link-dis {
+    color: #B9B9B9;
 }
-.no-link:hover {
+.link-dis:hover {
+    text-decoration: none;
+    color: #B9B9B9
+}
+.link-no-und {
+    color: #3A3A3A;
+}
+.link-no-und:hover {
     text-decoration: none;
 }
 .box {
@@ -75,9 +82,13 @@ footer {
 .search-results {
     margin: auto;
     text-align: center;
+    position: relative;
 }
 .track-result {
     padding: 0.1em;
+}
+.track-result-queueing {
+    color: red;
 }
 .search-button {
     padding-top: 2em;

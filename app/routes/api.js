@@ -122,16 +122,20 @@ module.exports = function(io, client) {
                   }
 
                   t = JSON.stringify(t);
-                  io.emit(key + '-queue', [t]);
+                  socket.broadcast.emit(key + '-queue', [t]);
+                  socket.emit('your-queue', [t]);
                   log.info('sending new track to queue - ' + key);
                   client.zadd(key, queue_end_time, t);
                 });
               });
-            }else {
+            } else {
               // no video could be found
               // if the video can not be found, send message just to the client
               // who tried to queue the song
-              socket.emit(key + '-queue', {status: 'failure', message: 'could not find video'})
+              socket.emit('your-queue', {
+                status: 'failure',
+                message: 'could not find video'
+              })
             }
           });
         });
