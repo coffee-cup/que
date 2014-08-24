@@ -1,10 +1,10 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('static-favicon');
-var logger = require('morgan');
+var express      = require('express');
+var path         = require('path');
+var favicon      = require('static-favicon');
+var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var log = require('./config/log.js');
+var bodyParser   = require('body-parser');
+var log          = require('./config/log.js');
 
 var app = express();
 var http = require('http').Server(app);
@@ -21,11 +21,11 @@ app.engine('html', require('ejs').renderFile);
 app.set('views', path.join(__dirname, 'public/views'));
 app.set('view engine', 'html');
 
-app.use(favicon());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
+app.use(favicon(__dirname + '/public/imgs/favicon.ico'));
 // app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 

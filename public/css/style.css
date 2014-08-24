@@ -41,7 +41,7 @@ footer {
     margin: auto;
 }
 .tc {
-  text-align: center;
+    text-align: center;
 }
 .hidden {
     display: none;
@@ -61,11 +61,30 @@ footer {
     margin: 1em;
     padding-left: 2em;
 }
-.search {
-    margin: 1.2em 1.2em 1em 1.2em;
+.no-link {
+    color: #404040;
+}
+.no-link:hover {
+    text-decoration: none;
+}
+.box {
+    padding: 1.2em 1.2em 1em 1.2em;
+    margin-top: 2em;
+    background: white;
+}
+.search-results {
+    margin: auto;
+    text-align: center;
+}
+.track-result {
+    padding: 0.1em;
 }
 .search-button {
     padding-top: 2em;
+}
+.searching {
+    position: relative;
+    height: 120px;
 }
 .home-banner {
     height: 100%;
@@ -74,7 +93,7 @@ footer {
 }
 .home-content {
     margin: auto;
-    margin-top: 5em;
+    margin-top: 3em;
     background-color: white;
 }
 .home-info-content {
@@ -84,23 +103,27 @@ footer {
     margin: 2em 0 1em 0;
 }
 .home-steps {
-  margin-left: 5em;
+    margin-left: 5em;
 }
 .home-steps dt {
-  font-size: 1.4em;
+    font-size: 1.4em;
 }
 .home-steps dd {
-  margin-left: 0;
+    margin-left: 0;
 }
 .home-info-content p {
-  margin-top: 2em;
+    margin-top: 2em;
 }
 .create-button-wrapper {
-  margin: 0 auto 2em auto;
+    margin: 0 auto 2em auto;
 }
-.create-button {
-  width: 100%;
+.one-but {
+    width: 100%;
 }
 .beta {
-  color: #818181;
+    color: #818181;
+}
+.nothing-playing {
+    background: white;
+    padding: 2em;
 }

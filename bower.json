@@ -22,5 +22,6 @@
     "angular-route": "~1.2.22",
     "angular-ui-utils": "~0.1.1",
     "jquery": "~2.1.1",
+    "spin.js": "~2.0.1"
   }
 }

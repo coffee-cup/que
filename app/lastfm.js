@@ -37,10 +37,14 @@ module.exports.trackInfo = function(track, artist, callback) {
   }
 
   log.info('get track info for: ' + track);
-  request({url: API_ROOT, json: true, qs: params}, function(error, response, body) {
+  request({
+    url: API_ROOT,
+    json: true,
+    qs: params
+  }, function(error, response, body) {
     if (!error && response.statusCode == 200 && body) {
       callback(body);
-    }else {
+    } else {
       callback(null);
     }
   });
@@ -65,7 +69,8 @@ module.exports.trackSearch = function(track, artist, callback) {
     qs: params
   }, function(error, response, body) {
     if (!error && response.statusCode == 200 && body) {
-      if (body.results.trackmatches.track) {
+      // is this bad practice?
+      if (body && body.results && body.results.trackmatches && body.results.trackmatches.track) {
         var tracks = body.results.trackmatches.track;
         var ts = [];
 

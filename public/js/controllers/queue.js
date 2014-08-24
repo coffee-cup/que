@@ -6,11 +6,14 @@ angular.module('queueController.controller', [])
     var socket = io.connect('', {
       'force new connection': true
     });
-    $scope.queue = [];
-    $scope.playing = null;
-    $scope.isPlaying = false;
-    $scope.no_results = false;
-    $scope.connected = false;
+
+    $scope.queue = []; // the music queue holding all of the video objects
+    $scope.playing = null; // the video object that is playing
+    $scope.isPlaying = false; // if a video is currently playing
+    $scope.no_results = false; // if no search results returned or found
+    $scope.isResults = false; // if we have not yet search (whether we should hide results div)
+    $scope.connected = false; // if we are connected to socketio
+    $scope.isSearching = false; // are we currently searching for track
 
     // set the header background color
     var color = intToARGB(hashCode($routeParams.key));
@@ -83,6 +86,8 @@ angular.module('queueController.controller', [])
 
     socket.on('search_results', function(data) {
       $scope.safeApply(function() {
+        $scope.isSearching = false;
+        $scope.isResults = true;
         if (data.status == 'failure' || !data) {
           $scope.no_results = true;
         } else {
@@ -110,6 +115,7 @@ angular.module('queueController.controller', [])
     });
 
     $scope.search = function(track, artist) {
+      $scope.isSearching = true;
       socket.emit('search', {
         artist: artist,
         track: track,
