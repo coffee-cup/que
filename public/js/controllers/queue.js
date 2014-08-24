@@ -14,7 +14,7 @@ angular.module('queueController.controller', [])
 
     // set the header background color
     var color = intToARGB(hashCode($routeParams.key));
-    $('.banner').css('background', '#' + color);
+    $('.queue-banner').css('background', '#' + color);
 
     // Hash any string into an integer value
     function hashCode(str) {
