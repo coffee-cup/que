@@ -68,13 +68,19 @@ angular.module('queueController.controller', [])
     socket.on('connect', function() {
       $scope.safeApply(function() {
         $scope.connected = true;
-        if (YT && YT.Player) {
-          player = new YT.Player('player', {
-            events: {
-              'onReady': onPlayerReady,
-              'onStateChange': onPlayerStateChange
-            }
-          });
+
+        // this will happen if the youtube libray is already loaded,
+        // like when you naviage back and forth in angular
+        if (!(typeof YT === 'undefined') && typeof YT.Player == 'function') {
+          if (!player) {
+            console.log('player');
+            player = new YT.Player('player', {
+              events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+              }
+            });
+          }
         }
       });
     });
@@ -86,7 +92,6 @@ angular.module('queueController.controller', [])
     });
 
     socket.on('search_results', function(data) {
-      console.log('search_resutls');
       $scope.safeApply(function() {
         $scope.isSearching = false;
         $scope.isResults = true;
@@ -118,7 +123,6 @@ angular.module('queueController.controller', [])
         // the video queuing did not work
         return;
       }
-
       queueData(data);
     });
 
@@ -161,14 +165,6 @@ angular.module('queueController.controller', [])
       $scope.playing = video_obj;
       $scope.isPlaying = true;
 
-      if (!player) {
-        player = new YT.Player('player', {
-          events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-          }
-        });
-      }
       player.loadVideoById(video_obj.video_id);
 
       // this syncs the times with other clients
@@ -209,7 +205,7 @@ angular.module('queueController.controller', [])
     tag.src = "https://www.youtube.com/iframe_api";
     var firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    var player;
+    var player = null;
 
     $window.onYouTubeIframeAPIReady = function() {
       player = new YT.Player('player', {

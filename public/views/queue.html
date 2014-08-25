@@ -94,7 +94,7 @@
             </div>
 
             <!-- the search results -->
-            <div ng-class="{hidden: !isResults || no_results || isSearching}" class="column-group box">
+            <div ng-class="{hidden: !isResults || no_results || isSearching || !connected}" class="column-group box">
                 <div class="xlarge-70 large-70 medium-60 small-100 tiny-100 search-results">
                     <ul class="unstyled">
                         <div ng-repeat="s in searches">

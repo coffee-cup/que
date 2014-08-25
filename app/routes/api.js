@@ -95,6 +95,8 @@ module.exports = function(io, client) {
 
                   // if we can, get the images and summary from lastfm track info
                   if (data) {
+                    console.log(data);
+
                     // get the album image if its there
                     if (data.track && data.track.album) {
                       var images = data.track.album.image;
@@ -150,6 +152,7 @@ module.exports = function(io, client) {
         client.zrangebyscore([key, '(' + now, '+inf'], function(err, mqueue) {
           if (err) log.error(err);
 
+          log.info('sending back all queue for ' + key);
           socket.emit(key + '-queue', mqueue);
         });
       }
